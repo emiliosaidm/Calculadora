@@ -14,6 +14,10 @@ import java.util.regex.Matcher;
  */
 public class Calculadora {
     
+    // Nota para cualquier desarrollador: El siguiente programa es una representación útil de una calculadora básica.
+    // Existen limitantes con respecto a su uso que se pueden encontrar en el reporte del proyecto. 
+    // Todas las comparaciones numericas fueron hechas utilizando Expresiones Regulares; nos apoyamos de la siguiente liga para poder validar 
+    // que estas que definimos fueran correctas: https://regex101.com/
      public Calculadora(){
         
     }
@@ -67,8 +71,12 @@ public class Calculadora {
             }
             
             
-            // El siguiente condicional verifica que si un número está presente en la expresión, entonces el segundo subsecuente debe de ser un paréntesis o un operando.
-            if(operacion.get(i).matches("^[-+]?\\d*\\.?\\d+$") && i < operacion.size() - 2 ){
+            // El siguiente condicional verifica que si un número está presente en la expresión, entonces el segundo subsecuente debe de ser un paréntesis o un operando. Además, da excepción al elevar 0 a la potencia 0. 
+            if(i < operacion.size() - 2 ){
+                
+                if(operacion.get(i).equals("0") && operacion.get(i + 1).equals("^") && operacion.get(i + 2).equals("0")){
+                    bandera = false;
+                }
                 if(operacion.get(i + 2).matches("^[-+]?\\d*\\.?\\d+$") && operacion.get(i + 2).equals("(")){
                     bandera = false;
                 }  
@@ -81,11 +89,13 @@ public class Calculadora {
             i++;
         }
         
-        // El siguiente 
+        // El siguiente condicional valida si es que la pila que se usa para validar el balance de paréntesis esté vacia, lo que significa que cada parentesis de apertura le corresponde uno de cerradura.
+        // Además, se valida que la bandera siga en true, lo que significa que pasó todas las pruebas arriba descritas.
         if(!pila.isEmpty() || !bandera){
             operacion.clear();
             operacion.add("Cadena inconsistente");
         }
+        // Regresa el Un ArrayList con la operación validada, lista para pasarse a postfija. 
         return operacion;
     }
     
@@ -95,20 +105,26 @@ public class Calculadora {
         String elemento;
         pila = new PilaA <>();
         postfija = new ArrayList<Character>();
+        // El siguiente ciclo itera por un ArrayList para pasar de infijo a postifo la expresión matemática ya validada.
         for(int i = 0; i < expresion.size(); i++){
             elemento = expresion.get(i);
+            //Si el elemento i es un número se guarda en el ArrayList de postfijo.
             if(elemento.matches("^[-+]?\\d*\\.?\\d+$")){
                 postfija.add(elemento);
             }
+            //Si el elemento i es una apertura de paréntesis, se guarda en la pila de operadores.
             if(elemento.equals("(")){
                 pila.push(elemento);
             }
+            //Si el elemento i es una cerradura de paréntesis, hasta que el tope de la pila de operadores sea la apertura de paréntesis, se sacan los operadores y se agregan al arreglo postfijo.
             if(elemento.equals(")")){
                 while(!pila.peek().equals("(")){
                     postfija.add(pila.pop());
                 }
                 pila.pop();
             }
+            // El siguiente condicional valida si el elemento i es un operador. Si lo es, se dispone a un cíclo, donde si la pila de operadores no esta vacia y la jerarquía del elemento tope de la pila es de mayor o igual jerarquia
+            // que el el elemento i, entonces se saca el elemento tope y se agrega al postfijo. De otra manera, y aunque no entre al ciclo, el elemento es agregado a la pila de operadores. 
             if(elemento.equals("*") || elemento.equals("/") || elemento.equals("+") || elemento.equals("-") || elemento.equals("^")){
                 while(!pila.isEmpty() && this.jerarquia(pila.peek()) >= this.jerarquia(elemento)){
                     postfija.add(pila.pop());
@@ -116,11 +132,12 @@ public class Calculadora {
                 pila.push(elemento);            
             }
         }
+        // El siguiente ciclo purga la pila de operadores y las agrega al postfijo.
         while(!pila.isEmpty()){
             postfija.add(pila.pop());
         }
 
-        
+        // Se regresa un ArrayList con la expresión matemática en postfijo para poder ser evaluada.
         return postfija;  
     }
     
@@ -130,7 +147,10 @@ public class Calculadora {
         String elemento;
         int i;
         pila = new PilaA();
+        // El siguiente ciclo estará iterando por la expresión psotfija para evaluarla utilizando como estructura de dato una pila.
         for(i = 0; i < postfija.size(); i++){
+            // El siguiente conducional valida si el elemento i de la expresion es un número elemento de los reales. Si es que lo es, lo mete a la pila como Double. 
+            // De otra manera, se 
             elemento = postfija.get(i);
             if(elemento.matches("^[-+]?\\d*\\.?\\d+$")){
                 pila.push(Double.valueOf(elemento));
@@ -165,7 +185,7 @@ public class Calculadora {
     }
     
     private ArrayList<String> separarExpresion(String texto){
-         String regex = "-?\\d*\\.?\\d+|[-+*/()^]";
+         String regex = "-?\\d*\\.?\\d+|[-+*/()^]" ;
          Pattern pattern = Pattern.compile(regex);
          Matcher matcher = pattern.matcher(texto);
          ArrayList<String> resultado = new ArrayList<String>();
@@ -186,7 +206,6 @@ public class Calculadora {
                 }
             }
         }
-        System.out.println(resultado);
         return resultado;
     }
     
@@ -239,7 +258,7 @@ public class Calculadora {
     public static void main(String[] args) {
        String[] resp;
         Calculadora calculadora = new Calculadora();
-        resp = calculadora.calcularExpresion("5^-8");
+        resp = calculadora.calcularExpresion("-1*5^2");
         if(resp[0].equals("1")){
             System.out.println(resp[1]);
         }else{

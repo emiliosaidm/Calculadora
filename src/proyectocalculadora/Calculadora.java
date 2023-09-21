@@ -289,7 +289,7 @@ public class Calculadora {
                 }
             }
         }
-        // Regresa un ArrayList con la expresion matemática del String en un Array.
+        // Regresa un ArrayList con la expresión matemática del String en un Array.
         return resultado;
     }
     

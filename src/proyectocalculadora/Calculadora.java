@@ -4,7 +4,9 @@
  */
 package proyectocalculadora;
 
-import java.util.ArrayList;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  *
@@ -23,32 +25,7 @@ public class Calculadora {
         boolean bandera;
         String num = "";
         int i, j;
-        for (i = 0; i < op.length(); i ++) {
-            if(Character.isDigit(op.charAt(i)) || op.charAt(i) == '-'){
-                j = i;
-                bandera = true;
-                while(j < op.length() && (Character.isDigit(op.charAt(j)) || op.charAt(j) == '.' || op.charAt(j) == '-') && bandera){
-                    if(op.charAt(j) == '-'){
-                        bandera = false;
-                    }else{
-                        num += op.charAt(j); 
-                    }    
-                    j++;
-                }
-                if(num != "")
-                    operacion.add(num);
-                if(!bandera){
-                    num = "-";
-                    if(j > i && i != j - 1)
-                        operacion.add("+");
-                }else{
-                    num = "";
-                }
-                i = j - 1;
-            }else{
-                operacion.add(String.valueOf(op.charAt(i)));
-            }
-        }
+        operacion = separarExpresion(op);
         i = 0;
         if(!operacion.isEmpty() && ((operacion.get(i).matches("^[-+]?\\d*\\.?\\d+$") || operacion.get(i).equals("(")) && (operacion.get(operacion.size() - 1).matches("^[-+]?\\d*\\.?\\d+$") || operacion.get(operacion.size() - 1).equals(")")))){
             bandera = true;
@@ -56,12 +33,24 @@ public class Calculadora {
             bandera = false;
         }
         while(i < operacion.size() && bandera ){
+            // El siguiente condicional agrega a una pila la apertura de un paréntesis. Además se valida si el elemento anterior, si es que existe, sea un operando.
             if(operacion.get(i).equals("(")){
+                if(i > 0 && operacion.get(i - 1).matches("^[-+]?\\d*\\.?\\d+$"))
+                    bandera = false;
                 pila.push(")");
             }
-            if (operacion.get(i).equals(")") && !pila.isEmpty()){
-                pila.pop();
+            // El siguiente condicional revisa si cada cerradura de paréntesis tiene uno de apertura para verificar que los paréntesis estén balanceados.  Además, si es que lo que le sigue a la cerradura del paréntesis es un operador.
+            if (operacion.get(i).equals(")")){
+                if(pila.isEmpty()){
+                    bandera = false;
+                }else{
+                    if(i < operacion.size() - 1 && operacion.get(i + 1).matches("^[-+]?\\d*\\.?\\d+$"))
+                        bandera = false;
+                    pila.pop();
+                    
+                }
             }
+            // El siguiente condicional verifica que si un número está presente en la expresión, entonces el segundo subsecuente debe de ser un paréntesis o un operando.
             if(operacion.get(i).matches("^[-+]?\\d*\\.?\\d+$") && i < operacion.size() - 2 ){
                 if(operacion.get(i + 2).matches("^[-+]?\\d*\\.?\\d+$") && operacion.get(i + 2).equals("(")){
                     bandera = false;
@@ -72,7 +61,7 @@ public class Calculadora {
             }
             i++;
         }
-                System.out.println(operacion);
+        System.out.println(operacion);
         if(!pila.isEmpty() || !bandera){
             operacion.clear();
             operacion.add("Cadena inconsistente");
@@ -155,6 +144,25 @@ public class Calculadora {
         return resp;
     }
     
+    private ArrayList<String> separarExpresion(String texto){
+         String regex = "-?\\d*\\.?\\d+|[-+*/()]";
+         Pattern pattern = Pattern.compile(regex);
+         Matcher matcher = pattern.matcher(texto);
+         ArrayList<String> resultado = new ArrayList<String>();
+
+        while (matcher.find()) {
+            System.out.println(matcher.group());
+            resultado.add(matcher.group());
+        }
+        for(int i = 0; i < resultado.size(); i++){
+            if(i < resultado.size() - 1 && resultado.get(i).matches("-?\\\\d+(\\\\.\\\\d+)?([eE][-+]?\\\\d+)?") && resultado.get(i + 1).matches("-?\\\\d+(\\\\.\\\\d+)?([eE][-+]?\\\\d+)?")){
+                resultado.add(i + 1, "+");
+            }
+        }
+        
+        return resultado;
+    }
+    
     private int jerarquia(String operador){
         int resp;
         resp = 0;
@@ -204,7 +212,7 @@ public class Calculadora {
     public static void main(String[] args) {
        String[] resp;
         Calculadora calculadora = new Calculadora();
-        resp = calculadora.calcularExpresion("-100+10");
+        resp = calculadora.calcularExpresion(".4565.8458");
         if(resp[0].equals("1")){
             System.out.println(resp[1]);
         }else{

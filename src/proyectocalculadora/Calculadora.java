@@ -21,18 +21,30 @@ public class Calculadora {
         ArrayList<String> operacion = new ArrayList <> ();
         PilaADT pila = new PilaA ();
         boolean bandera;
-        String num;
+        String num = "";
         int i, j;
         for (i = 0; i < op.length(); i ++) {
-            if(Character.isDigit(op.charAt(i))){
+            if(Character.isDigit(op.charAt(i)) || op.charAt(i) == '-'){
                 j = i;
-                num = "";
-                while(j < op.length() && (Character.isDigit(op.charAt(j)) || op.charAt(j) == '.')){
-                    num += op.charAt(j);
+                bandera = true;
+                while(j < op.length() && (Character.isDigit(op.charAt(j)) || op.charAt(j) == '.' || op.charAt(j) == '-') && bandera){
+                    if(op.charAt(j) == '-'){
+                        bandera = false;
+                    }else{
+                        num += op.charAt(j); 
+                    }    
                     j++;
                 }
+                if(num != "")
+                    operacion.add(num);
+                if(!bandera){
+                    num = "-";
+                    if(j > i && i != j - 1)
+                        operacion.add("+");
+                }else{
+                    num = "";
+                }
                 i = j - 1;
-                operacion.add(num);
             }else{
                 operacion.add(String.valueOf(op.charAt(i)));
             }
@@ -192,7 +204,7 @@ public class Calculadora {
     public static void main(String[] args) {
        String[] resp;
         Calculadora calculadora = new Calculadora();
-        resp = calculadora.calcularExpresion("0.5-0.5");
+        resp = calculadora.calcularExpresion("-100+10");
         if(resp[0].equals("1")){
             System.out.println(resp[1]);
         }else{

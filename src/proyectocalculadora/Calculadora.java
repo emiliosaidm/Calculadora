@@ -44,8 +44,9 @@ public class Calculadora {
                 if(pila.isEmpty()){
                     bandera = false;
                 }else{
-                    if(i < operacion.size() - 1 && operacion.get(i + 1).matches("^[-+]?\\d*\\.?\\d+$"))
-                        bandera = false;
+                    if(i < operacion.size() - 1 && !(operacion.get(i + 1).equals("+") || operacion.get(i + 1).equals("-") || operacion.get(i + 1).equals("/") || operacion.get(i + 1).equals("*") || operacion.get(i + 1).equals("^")) ){
+                       bandera = false;
+                    }
                     pila.pop();
                     
                 }
@@ -54,6 +55,7 @@ public class Calculadora {
             if(operacion.get(i).matches("^[-+]?\\d*\\.?\\d+$") && i < operacion.size() - 1 ){
                 if(operacion.get(i + 1).matches("^[-+]?\\d*\\.?\\d+$")){
                     bandera = false;
+                    
                 } 
             }
             // El siguiente condicional verifica que si un número está presente en la expresión, entonces el segundo subsecuente debe de ser un paréntesis o un operando.
@@ -68,7 +70,6 @@ public class Calculadora {
             }
             i++;
         }
-        System.out.println(operacion);
         if(!pila.isEmpty() || !bandera){
             operacion.clear();
             operacion.add("Cadena inconsistente");
@@ -152,7 +153,7 @@ public class Calculadora {
     }
     
     private ArrayList<String> separarExpresion(String texto){
-         String regex = "-?\\d*\\.?\\d+|[-+*/()]";
+         String regex = "-?\\d*\\.?\\d+|[-+*/()^]";
          Pattern pattern = Pattern.compile(regex);
          Matcher matcher = pattern.matcher(texto);
          ArrayList<String> resultado = new ArrayList<String>();
@@ -161,11 +162,17 @@ public class Calculadora {
             resultado.add(matcher.group());
         }
         for(int i = 0; i < resultado.size(); i++){
-            if(i < resultado.size() - 1 && resultado.get(i).matches("-?\\\\d+(\\\\.\\\\d+)?([eE][-+]?\\\\d+)?") && resultado.get(i + 1).matches("-?\\\\d+(\\\\.\\\\d+)?([eE][-+]?\\\\d+)?")){
+            if(i < resultado.size() - 1 && resultado.get(i).matches("^[-+]?\\d*\\.?\\d+$") && resultado.get(i + 1).matches("^[-+]?\\d*\\.?\\d+$")){
                 resultado.add(i + 1, "+");
+            } else if(i < resultado.size() - 1 && resultado.get(i).equals(")") && resultado.get(i + 1).matches("^[-+]?\\d*\\.?\\d+$")){
+               resultado.add(i + 1, "+"); 
+            }
+            if(resultado.get(i).matches("^[-+]?\\d*\\.?\\d+$") && Double.parseDouble(resultado.get(i)) < 0 && i > 0 && !resultado.get(i - 1).equals("(")){
+                resultado.set(i - 1, "-");
+                resultado.set(i, Math.abs(Double.parseDouble(resultado.get(i))) + "");
             }
         }
-        
+        System.out.println(resultado);
         return resultado;
     }
     
@@ -218,7 +225,7 @@ public class Calculadora {
     public static void main(String[] args) {
        String[] resp;
         Calculadora calculadora = new Calculadora();
-        resp = calculadora.calcularExpresion(".4565.8458");
+        resp = calculadora.calcularExpresion("(78/6-3)*63/96+-32^2");
         if(resp[0].equals("1")){
             System.out.println(resp[1]);
         }else{

@@ -33,13 +33,15 @@ public class Calculadora {
             bandera = false;
         }
         while(i < operacion.size() && bandera ){
-            // El siguiente condicional agrega a una pila la apertura de un paréntesis. Además se valida si el elemento anterior, si es que existe, sea un operando.
+            // El siguiente condicional agrega a una pila la apertura de un paréntesis. Además se valida si el elemento anterior, si es que existe, sea un operando y que el elemento siguiente sea un operando
             if(operacion.get(i).equals("(")){
-                if(i > 0 && operacion.get(i - 1).matches("^[-+]?\\d*\\.?\\d+$"))
+                if(i > 0 && !(operacion.get(i - 1).equals("+") || operacion.get(i - 1).equals("-") || operacion.get(i - 1).equals("/") || operacion.get(i - 1).equals("*") || operacion.get(i - 1).equals("^")))
+                    bandera = false;
+                if(i < operacion.size() - 1 && !operacion.get(i + 1).matches("^[-+]?\\d*\\.?\\d+$"))
                     bandera = false;
                 pila.push(")");
             }
-            // El siguiente condicional revisa si cada cerradura de paréntesis tiene uno de apertura para verificar que los paréntesis estén balanceados.  Además, si es que lo que le sigue a la cerradura del paréntesis es un operador.
+            // El siguiente condicional revisa si cada cerradura de paréntesis tiene uno de apertura para verificar que los paréntesis estén balanceados.  Además, si es que lo que le sigue a la cerradura del paréntesis es un operador, y si lo que le procede al parentesis es un operando. 
             if (operacion.get(i).equals(")")){
                 if(pila.isEmpty()){
                     bandera = false;
@@ -47,29 +49,39 @@ public class Calculadora {
                     if(i < operacion.size() - 1 && !(operacion.get(i + 1).equals("+") || operacion.get(i + 1).equals("-") || operacion.get(i + 1).equals("/") || operacion.get(i + 1).equals("*") || operacion.get(i + 1).equals("^")) ){
                        bandera = false;
                     }
+                    if(i > 0 &&  !operacion.get(i - 1).matches("^[-+]?\\d*\\.?\\d+$")){
+                        bandera = false;
+                    }
+                        
                     pila.pop();
                     
                 }
             }
-            // El siguiente condicional valida que no haya 2 terminos consecutivos sin un operador entre ellos.
-            if(operacion.get(i).matches("^[-+]?\\d*\\.?\\d+$") && i < operacion.size() - 1 ){
-                if(operacion.get(i + 1).matches("^[-+]?\\d*\\.?\\d+$")){
+            // El siguiente condicional valida que no haya 2 terminos consecutivos sin un operador entre ellos. Recipricamente, revisa si no hay 2 operadores consecutivos
+            if(i < operacion.size() - 1 ){ 
+                if(operacion.get(i).matches("^[-+]?\\d*\\.?\\d+$") && operacion.get(i + 1).matches("^[-+]?\\d*\\.?\\d+$" )){
                     bandera = false;
-                    
-                } 
+                } else if((operacion.get(i).equals("+") || operacion.get(i).equals("-") || operacion.get(i).equals("*") || operacion.get(i).equals("/") || operacion.get(i).equals("^")) && (operacion.get(i + 1).equals("+") || operacion.get(i + 1).equals("-") || operacion.get(i + 1).equals("*") || operacion.get(i + 1).equals("/") || operacion.get(i + 1).equals("^"))){
+                    bandera = false;
+                }
             }
+            
+            
             // El siguiente condicional verifica que si un número está presente en la expresión, entonces el segundo subsecuente debe de ser un paréntesis o un operando.
             if(operacion.get(i).matches("^[-+]?\\d*\\.?\\d+$") && i < operacion.size() - 2 ){
                 if(operacion.get(i + 2).matches("^[-+]?\\d*\\.?\\d+$") && operacion.get(i + 2).equals("(")){
                     bandera = false;
                 }  
             }
+            
             // El siguiente condicional verifica que no haya divisiones entre 0.
             if(operacion.get(i).equals("/") && operacion.get(i + 1).equals("0")){
                 bandera = false;
             }
             i++;
         }
+        
+        // El siguiente 
         if(!pila.isEmpty() || !bandera){
             operacion.clear();
             operacion.add("Cadena inconsistente");
@@ -168,8 +180,10 @@ public class Calculadora {
                resultado.add(i + 1, "+"); 
             }
             if(resultado.get(i).matches("^[-+]?\\d*\\.?\\d+$") && Double.parseDouble(resultado.get(i)) < 0 && i > 0 && !resultado.get(i - 1).equals("(")){
-                resultado.set(i - 1, "-");
-                resultado.set(i, Math.abs(Double.parseDouble(resultado.get(i))) + "");
+                if(!resultado.get(i - 1).equals("^")){
+                    resultado.set(i - 1, "-");
+                    resultado.set(i, Math.abs(Double.parseDouble(resultado.get(i))) + "");   
+                }
             }
         }
         System.out.println(resultado);
@@ -225,7 +239,7 @@ public class Calculadora {
     public static void main(String[] args) {
        String[] resp;
         Calculadora calculadora = new Calculadora();
-        resp = calculadora.calcularExpresion("(78/6-3)*63/96+-32^2");
+        resp = calculadora.calcularExpresion("5^-8");
         if(resp[0].equals("1")){
             System.out.println(resp[1]);
         }else{

@@ -50,12 +50,19 @@ public class Calculadora {
                     
                 }
             }
+            // El siguiente condicional valida que no haya 2 terminos consecutivos sin un operador entre ellos.
+            if(operacion.get(i).matches("^[-+]?\\d*\\.?\\d+$") && i < operacion.size() - 1 ){
+                if(operacion.get(i + 1).matches("^[-+]?\\d*\\.?\\d+$")){
+                    bandera = false;
+                } 
+            }
             // El siguiente condicional verifica que si un número está presente en la expresión, entonces el segundo subsecuente debe de ser un paréntesis o un operando.
             if(operacion.get(i).matches("^[-+]?\\d*\\.?\\d+$") && i < operacion.size() - 2 ){
                 if(operacion.get(i + 2).matches("^[-+]?\\d*\\.?\\d+$") && operacion.get(i + 2).equals("(")){
                     bandera = false;
                 }  
             }
+            // El siguiente condicional verifica que no haya divisiones entre 0.
             if(operacion.get(i).equals("/") && operacion.get(i + 1).equals("0")){
                 bandera = false;
             }
@@ -151,7 +158,6 @@ public class Calculadora {
          ArrayList<String> resultado = new ArrayList<String>();
 
         while (matcher.find()) {
-            System.out.println(matcher.group());
             resultado.add(matcher.group());
         }
         for(int i = 0; i < resultado.size(); i++){
